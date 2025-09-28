@@ -2,6 +2,88 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MuPhaseNet — Audio Examples</title>
+<style>
+  body{font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#111}
+  h1{font-size:20px;margin:0 0 8px}
+  .legend{color:#666;margin:6px 0 16px}
+  table{width:100%;border-collapse:collapse}
+  thead th{font-size:14px;color:#666;text-align:left;border-bottom:1px solid #ddd;padding:8px 6px}
+  tbody td{border-bottom:1px solid #eee;padding:8px 6px;vertical-align:middle}
+  .sys{display:flex;gap:8px;flex-wrap:wrap}
+  button{border:1px solid #ccc;padding:6px 10px;background:#fafafa;border-radius:8px;cursor:pointer}
+  button.active{border-color:#0b6cff;background:#eef4ff}
+  audio{width:260px;height:28px}
+  .small{font-size:12px;color:#666}
+  .rowhdr{white-space:nowrap}
+  @media (max-width:760px){audio{width:100%}}
+</style>
 <h1>MuPhaseNet — Audio Examples</h1>
-<p>If you see this, GitHub Pages is working.</p>
-<p>We’ll add the audio player next under <code>docs/audio/</code>.</p>
+<p class="legend">Systems: NoEnh (unprocessed), Clean (reference), MPN (baseline), MPN+EE, MPN+EE+ED-Phase</p>
+<table aria-label="audio examples">
+  <thead><tr><th>Clip</th><th>System</th><th>Player</th><th class="small">Notes</th></tr></thead>
+  <tbody id="tbody"></tbody>
+</table>
+<p class="small" id="footer">Normalization: −16 LUFS; SR 16 kHz. Files: WAV. Headphones recommended.</p>
+<script>
+const EXT = "wav"; // change to "mp3" if you used mp3
+const SYSTEMS = [
+  { key:"noenh",         label:"NoEnh (unprocessed)" },
+  { key:"clean",         label:"Clean (reference)" },
+  { key:"mpn",           label:"MPN (baseline)" },
+  { key:"mpn_ee",        label:"MPN+EE" },
+  { key:"mpn_ee_edphase",label:"MPN+EE+ED-Phase" }
+];
+const CLIPS = [
+  { id:"clip1", label:"Clip 1" },
+  { id:"clip2", label:"Clip 2" },
+  { id:"clip3", label:"Clip 3" }
+];
+
+const tbody = document.getElementById('tbody');
+const players = new Map(); // clipId -> Map(systemKey -> Audio)
+function stopAllExcept(keep){ players.forEach(m=>m.forEach(a=>{ if(a!==keep&&!a.paused) a.pause(); })); }
+
+CLIPS.forEach(clip=>{
+  const tr=document.createElement('tr');
+
+  // clip label
+  const tdClip=document.createElement('td'); tdClip.className='rowhdr'; tdClip.textContent=clip.label; tr.appendChild(tdClip);
+
+  // buttons
+  const tdBtns=document.createElement('td'); const wrap=document.createElement('div'); wrap.className='sys'; tdBtns.appendChild(wrap); tr.appendChild(tdBtns);
+
+  // player
+  const tdPlayer=document.createElement('td'); const aud=document.createElement('audio'); aud.controls=true; tdPlayer.appendChild(aud); tr.appendChild(tdPlayer);
+
+  // notes
+  const tdNote=document.createElement('td'); tdNote.className='small'; tdNote.textContent='—'; tr.appendChild(tdNote);
+
+  if(!players.has(clip.id)) players.set(clip.id,new Map());
+
+  // default system
+  const first = SYSTEMS[0];
+  aud.src = `audio/${clip.id}/${first.key}.${EXT}`;
+  aud.addEventListener('play', ()=>stopAllExcept(aud));
+  players.get(clip.id).set(first.key, aud);
+
+  // other systems + buttons
+  SYSTEMS.forEach((s,idx)=>{
+    const b=document.createElement('button'); b.textContent=s.label; if(idx===0) b.classList.add('active');
+    b.addEventListener('click', ()=>{
+      b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+      const wasPlaying=!aud.paused && !aud.ended; const t=aud.currentTime||0;
+      aud.src = `audio/${clip.id}/${s.key}.${EXT}`;
+      if(wasPlaying) aud.play().catch(()=>{});
+      if(t>0) aud.currentTime = t;
+    });
+    wrap.appendChild(b);
+
+    if(idx>0){
+      const a=new Audio(`audio/${clip.id}/${s.key}.${EXT}`); a.preload='metadata'; a.addEventListener('play',()=>stopAllExcept(a));
+      players.get(clip.id).set(s.key,a);
+    }
+  });
+
+  tbody.appendChild(tr);
+});
+</script>
