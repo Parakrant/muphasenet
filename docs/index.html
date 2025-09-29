@@ -1,89 +1,257 @@
 <!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>MuPhaseNet — Audio Examples</title>
+<meta name="description" content="Audio examples for MuPhaseNet with Block A (noise+reverb) and Block B (effects-aware) systems."/>
 <style>
-  body{font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#111}
+  :root{--fg:#111;--muted:#666;--bg:#fff;--acc:#0b6cff}
+  *{box-sizing:border-box}
+  body{font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg);margin:24px}
   h1{font-size:20px;margin:0 0 8px}
-  .legend{color:#666;margin:6px 0 16px}
+  h2{font-size:18px;margin:24px 0 8px}
+  p{margin:0 0 12px}
+  .legend{font-size:14px;color:var(--muted);margin:6px 0 16px}
   table{width:100%;border-collapse:collapse}
-  thead th{font-size:14px;color:#666;text-align:left;border-bottom:1px solid #ddd;padding:8px 6px}
+  thead th{text-align:left;font-weight:600;font-size:14px;color:var(--muted);border-bottom:1px solid #ddd;padding:8px 6px}
   tbody td{border-bottom:1px solid #eee;padding:8px 6px;vertical-align:middle}
-  .sys{display:flex;gap:8px;flex-wrap:wrap}
-  button{border:1px solid #ccc;padding:6px 10px;background:#fafafa;border-radius:8px;cursor:pointer}
-  button.active{border-color:#0b6cff;background:#eef4ff}
-  audio{width:260px;height:28px}
-  .small{font-size:12px;color:#666}
+  .sys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .group-tag{font-size:12px;color:#666;margin-right:6px;margin-top:4px}
+  .group-sep{width:100%;height:0;display:block;margin:4px 0;border-top:1px dashed #ddd}
+  button{border:1px solid #ccc;padding:6px 10px;background:#fafafa;border-radius:8px;cursor:pointer;transition:all .12s}
+  button:hover{border-color:#bbb}
+  button.active{border-color:var(--acc);background:#eef4ff}
+  audio{width:260px;height:28px;vertical-align:middle}
+  .small{font-size:12px;color:var(--muted)}
   .rowhdr{white-space:nowrap}
+  .results caption{caption-side:top;text-align:left;font-weight:600;color:#333;padding:0 0 6px}
+  .hr{margin:24px 0;border:none;border-top:1px solid #eee}
   @media (max-width:760px){audio{width:100%}}
 </style>
+</head>
+<body>
+
 <h1>MuPhaseNet — Audio Examples</h1>
-<p class="legend">Systems: NoEnh (unprocessed), Clean (reference), MPN (baseline), MPN+EE, MPN+EE+ED-Phase</p>
+<p>Short 10–15s excerpts. Click a system to A/B within a clip; players auto-stop others.</p>
+
+<!-- Audio demo table -->
+<p class="legend" id="legend">Loading…</p>
 <table aria-label="audio examples">
-  <thead><tr><th>Clip</th><th>System</th><th>Player</th><th class="small">Notes</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Clip</th>
+      <th>System</th>
+      <th>Player</th>
+      <th class="small">Notes</th>
+    </tr>
+  </thead>
   <tbody id="tbody"></tbody>
 </table>
-<p class="small" id="footer">Normalization: −16 LUFS; SR 16 kHz. Files: WAV. Headphones recommended.</p>
+
+<p class="small" id="footer">—</p>
+
+<hr class="hr"/>
+
+<!-- Results table (HTML mirror of the paper) -->
+<h2>Table 1 — Objective metrics and MOS</h2>
+<p class="small" style="margin-bottom:8px">
+Combined objective metrics and subjective MOS on the MUSDB18 test set. ↑ higher is better; ↓ lower is better.
+Block&nbsp;A: trained with baseline noise+reverb simulator.
+Block&nbsp;B: trained with the proposed effects-aware simulator.
+MOS: 15 listeners, 30 clips (mean ± 95% CI).
+</p>
+
+<table class="results" aria-label="results table">
+  <thead>
+    <tr>
+      <th>System</th>
+      <th>SDR&nbsp;↑</th>
+      <th>fwSSNR&nbsp;↑</th>
+      <th>L1&nbsp;↓</th>
+      <th>MRS&nbsp;↓</th>
+      <th>MOS (mean&nbsp;±&nbsp;CI)&nbsp;↑</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td colspan="6"><em>A) Trained with baseline noise+reverb simulator</em></td></tr>
+    <tr>
+      <td>Chae (ref.)</td>
+      <td>4.66</td><td>12.68</td><td>1.25</td><td>0.81</td><td>3.25 ± 0.12</td>
+    </tr>
+    <tr>
+      <td><strong>MPN (baseline)</strong></td>
+      <td><strong>5.36</strong></td><td><strong>13.09</strong></td><td><strong>1.15</strong></td><td><strong>0.75</strong></td><td>3.40 ± 0.10</td>
+    </tr>
+
+    <tr><td colspan="6"><em>B) Trained with proposed effects-aware simulator</em></td></tr>
+    <tr>
+      <td>MPN</td>
+      <td>4.01</td><td>12.34</td><td>1.29</td><td>0.87</td><td>3.20 ± 0.10</td>
+    </tr>
+    <tr>
+      <td>MPN+EE</td>
+      <td>4.19</td><td>12.36</td><td>1.32</td><td>0.88</td><td>3.40 ± 0.10</td>
+    </tr>
+    <tr>
+      <td><strong>MPN+EE+ED-Mag</strong></td>
+      <td><strong>4.40</strong></td><td>12.46</td><td>1.27</td><td><strong>0.85</strong></td><td>3.75 ± 0.09</td>
+    </tr>
+    <tr>
+      <td><strong>MPN+EE+ED-Phase</strong></td>
+      <td>4.20</td><td><strong>12.47</strong></td><td><strong>1.26</strong></td><td><strong>0.85</strong></td><td><strong>3.88 ± 0.09</strong></td>
+    </tr>
+
+    <tr><td colspan="6"><em>Context</em></td></tr>
+    <tr>
+      <td>NoEnh</td>
+      <td>−3.34</td><td>6.33</td><td>2.52</td><td>1.78</td><td>2.40 ± 0.12</td>
+    </tr>
+    <tr>
+      <td>Clean (reference)</td>
+      <td>—</td><td>—</td><td>—</td><td>—</td><td>4.60 ± 0.07</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer style="margin-top:16px">
+  <p class="small">Project page: <a href="https://parakrant.github.io/muphasenet/" target="_blank" rel="noopener">parakrant.github.io/muphasenet</a></p>
+</footer>
+
 <script>
-const EXT = "wav"; // change to "mp3" if you used mp3
+/* =======================
+   CONFIG — edit as needed
+   ======================= */
+const EXT = "wav"; // or "mp3" if your files are MP3
+
+// Seven systems total, grouped to match the paper’s Block A/B
 const SYSTEMS = [
-  { key:"noenh",         label:"NoEnh (unprocessed)" },
-  { key:"clean",         label:"Clean (reference)" },
-  { key:"mpn",           label:"MPN (baseline)" },
-  { key:"mpn_ee",        label:"MPN+EE" },
-  { key:"mpn_ee_edphase",label:"MPN+EE+ED-Phase" }
+  // Context
+  { key:"noenh",           label:"NoEnh (unprocessed)",     group:"Context" },
+  { key:"clean",           label:"Clean (reference)",       group:"Context" },
+
+  // Block A: baseline noise+reverb simulator
+  { key:"mpn_baseline",    label:"(A) MPN (noise+reverb)",  group:"Block A" },
+
+  // Block B: proposed effects-aware simulator
+  { key:"mpn_effectaware", label:"(B) MPN (effects-aware)", group:"Block B" },
+  { key:"mpn_ee",          label:"(B) MPN+EE",              group:"Block B" },
+  { key:"mpn_ee_edmag",    label:"(B) MPN+EE+ED-Mag",       group:"Block B" },
+  { key:"mpn_ee_edphase",  label:"(B) MPN+EE+ED-Phase",     group:"Block B" }
 ];
+
+// Three clips (rename labels if you like)
 const CLIPS = [
   { id:"clip1", label:"Clip 1" },
   { id:"clip2", label:"Clip 2" },
   { id:"clip3", label:"Clip 3" }
 ];
 
+// Footer info
+const NORMALIZATION = "−16 LUFS";
+const SR_KHZ = 16; // set to 44.1/48 if you exported at those rates
+
+/* ==============
+   Page rendering
+   ============== */
+const legend = document.getElementById('legend');
+legend.innerHTML = 'Systems: ' + SYSTEMS
+  .map(s => `<span class="small" style="margin-right:8px">${s.group ? `[${s.group}] ` : ''}${s.label}</span>`)
+  .join(' ');
+
+document.getElementById('footer').textContent =
+  `Normalization: ${NORMALIZATION}; SR ${SR_KHZ} kHz. Files: ${EXT.toUpperCase()}. Headphones recommended.`;
+
 const tbody = document.getElementById('tbody');
 const players = new Map(); // clipId -> Map(systemKey -> Audio)
-function stopAllExcept(keep){ players.forEach(m=>m.forEach(a=>{ if(a!==keep&&!a.paused) a.pause(); })); }
 
-CLIPS.forEach(clip=>{
-  const tr=document.createElement('tr');
+function stopAllExcept(keep){
+  players.forEach(sysMap => sysMap.forEach(a => { if(a!==keep && !a.paused){ a.pause(); }}));
+}
 
-  // clip label
-  const tdClip=document.createElement('td'); tdClip.className='rowhdr'; tdClip.textContent=clip.label; tr.appendChild(tdClip);
+function switchSys(clipId, sysKey, btn){
+  const tr = btn.closest('tr');
+  const aud = tr.querySelector('audio');
+  const wasPlaying = !aud.paused && !aud.ended;
+  const t = aud.currentTime || 0;
 
-  // buttons
-  const tdBtns=document.createElement('td'); const wrap=document.createElement('div'); wrap.className='sys'; tdBtns.appendChild(wrap); tr.appendChild(tdBtns);
+  // Toggle active button styles
+  btn.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
 
-  // player
-  const tdPlayer=document.createElement('td'); const aud=document.createElement('audio'); aud.controls=true; tdPlayer.appendChild(aud); tr.appendChild(tdPlayer);
+  aud.src = `audio/${clipId}/${sysKey}.${EXT}`;
+  if (wasPlaying) { aud.play().catch(()=>{}); }
+  if (t > 0) { aud.currentTime = t; }
+}
 
-  // notes
-  const tdNote=document.createElement('td'); tdNote.className='small'; tdNote.textContent='—'; tr.appendChild(tdNote);
+CLIPS.forEach(clip => {
+  const tr = document.createElement('tr');
 
-  if(!players.has(clip.id)) players.set(clip.id,new Map());
+  // Clip label
+  const tdClip = document.createElement('td');
+  tdClip.className = 'rowhdr';
+  tdClip.textContent = clip.label;
+  tr.appendChild(tdClip);
 
-  // default system
-  const first = SYSTEMS[0];
-  aud.src = `audio/${clip.id}/${first.key}.${EXT}`;
-  aud.addEventListener('play', ()=>stopAllExcept(aud));
-  players.get(clip.id).set(first.key, aud);
+  // Buttons with group separators
+  const tdBtns = document.createElement('td');
+  const wrap = document.createElement('div');
+  wrap.className = 'sys';
 
-  // other systems + buttons
-  SYSTEMS.forEach((s,idx)=>{
-    const b=document.createElement('button'); b.textContent=s.label; if(idx===0) b.classList.add('active');
-    b.addEventListener('click', ()=>{
-      b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-      const wasPlaying=!aud.paused && !aud.ended; const t=aud.currentTime||0;
-      aud.src = `audio/${clip.id}/${s.key}.${EXT}`;
-      if(wasPlaying) aud.play().catch(()=>{});
-      if(t>0) aud.currentTime = t;
-    });
-    wrap.appendChild(b);
-
-    if(idx>0){
-      const a=new Audio(`audio/${clip.id}/${s.key}.${EXT}`); a.preload='metadata'; a.addEventListener('play',()=>stopAllExcept(a));
-      players.get(clip.id).set(s.key,a);
+  const groups = Array.from(new Set(SYSTEMS.map(s => s.group || "")));
+  groups.forEach((g, gi) => {
+    if (g) {
+      const tag = document.createElement('span');
+      tag.textContent = g + ':';
+      tag.className = 'group-tag';
+      wrap.appendChild(tag);
     }
+    SYSTEMS.filter(s => (s.group||"") === g).forEach((s, idxInGroup) => {
+      const b = document.createElement('button');
+      b.textContent = s.label;
+      if (gi === 0 && idxInGroup === 0) b.classList.add('active'); // first overall
+      b.addEventListener('click', () => switchSys(clip.id, s.key, b));
+      wrap.appendChild(b);
+    });
+    if (gi < groups.length - 1) {
+      const sep = document.createElement('span');
+      sep.className = 'group-sep';
+      wrap.appendChild(sep);
+    }
+  });
+
+  tdBtns.appendChild(wrap);
+  tr.appendChild(tdBtns);
+
+  // Player
+  const tdPlayer = document.createElement('td');
+  const aud = document.createElement('audio');
+  aud.controls = true;
+  aud.src = `audio/${clip.id}/${SYSTEMS[0].key}.${EXT}`; // default to first system
+  aud.addEventListener('play', () => stopAllExcept(aud));
+  tdPlayer.appendChild(aud);
+  tr.appendChild(tdPlayer);
+
+  // Notes
+  const tdNote = document.createElement('td');
+  tdNote.className = 'small';
+  tdNote.textContent = '—';
+  tr.appendChild(tdNote);
+
+  // Register default player
+  if (!players.has(clip.id)) players.set(clip.id, new Map());
+  players.get(clip.id).set(SYSTEMS[0].key, aud);
+
+  // Preload other systems for quick switching
+  SYSTEMS.slice(1).forEach(s => {
+    const a = new Audio(`audio/${clip.id}/${s.key}.${EXT}`);
+    a.preload = 'metadata';
+    a.addEventListener('play', () => stopAllExcept(a));
+    players.get(clip.id).set(s.key, a);
   });
 
   tbody.appendChild(tr);
 });
 </script>
+</body>
+</html>
