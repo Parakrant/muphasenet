@@ -1,0 +1,17 @@
+# Ignore sample audio files
+sample_*
+
+# Ignore common temporary files
+*~
+.DS_Store
+*.tmp
+*.swp
+*.swo
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Ignore system files
+Thumbs.db
